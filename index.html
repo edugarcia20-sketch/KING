@@ -1,28 +1,29 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>KING — v5.7.3a Calendário Vivo</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>KING — v5.7.4 Calendário Vivo (Rei Vivo)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#0a0a0a">
 <style>
   :root{
     --bg:#050505;
     --card:#0e0e0e;
-    --muted:#b6bcc2;
+    --muted:#aeb6bd;
     --text:#f6f6f6;
     --gold:#d4af37;
     --red:#8b0000;
-    --smoke:rgba(255,255,255,0.10); /* cinza-fumaça "aceso" */
+    --smoke:rgba(255,255,255,0.12); /* caixinhas mais claras */
     --smoke-weak:rgba(255,255,255,0.06);
     --glass:rgba(255,255,255,0.03);
+    --taskbar-h:90px;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;-webkit-font-smoothing:antialiased}
-  a{color:inherit}
+  a{color:inherit;text-decoration:none}
 
-  /* header */
+  /* HEADER */
   .header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
   .brand{display:flex;flex-direction:column}
   .brand .title{font-weight:700;color:var(--gold);letter-spacing:0.4px}
@@ -36,7 +37,7 @@
   .monthly-bar{height:6px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.03);overflow:hidden}
   .monthly-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ffd66b);transition:width .6s ease}
 
-  /* calendar grid */
+  /* main calendar area */
   main{flex:1;display:block;height:calc(100vh - 172px);overflow:auto;padding:14px}
   .calendar{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
   .weeknames{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
@@ -47,27 +48,30 @@
     min-height:96px;
     border-radius:12px;
     padding:10px;
-    border:1px solid rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.04);
     position:relative;
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
     align-items:flex-start;
-    transition:all .14s ease;
+    transition:all .15s ease;
     cursor:pointer;
   }
-  .cell:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(0,0,0,0.6)}
+  .cell:hover{transform:translateY(-6px);box-shadow:0 28px 64px rgba(0,0,0,0.55)}
   .cell .num{font-weight:700;font-size:18px}
   .cell .preview{font-size:13px;color:var(--muted);margin-top:8px}
-  .cell.past{opacity:0.6;filter:grayscale(.02)}
-  .cell.today{outline:3px solid rgba(212,175,55,0.12);box-shadow:0 10px 36px rgba(212,175,55,0.04)}
-  .cell.folga{background:linear-gradient(180deg, rgba(139,0,0,0.12), rgba(139,0,0,0.04));border:1px solid rgba(139,0,0,0.12)}
+  .cell.past{opacity:0.55;filter:grayscale(.04)}
+  .cell.today{outline:3px solid rgba(212,175,55,0.16);box-shadow:0 10px 36px rgba(212,175,55,0.05)}
+  .cell.folga{background:linear-gradient(180deg, rgba(139,0,0,0.14), rgba(139,0,0,0.06));border:1px solid rgba(139,0,0,0.13)}
   .cell .tag{position:absolute;right:8px;bottom:8px;font-size:11px;color:rgba(255,255,255,0.85)}
+  /* make cells responsive taller on larger screens */
+  @media(min-width:900px){ .cell{min-height:110px} }
 
-  /* footer taskbar */
-  .taskbar{position:fixed;left:12px;right:12px;bottom:12px;height:74px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border:1px solid rgba(255,255,255,0.03);z-index:40;backdrop-filter:blur(6px)}
-  .slot{display:flex;gap:12px;align-items:center}
-  .icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-size:20px;cursor:pointer}
+  /* TASKBAR */
+  .taskbar{position:fixed;left:14px;right:14px;bottom:14px;height:var(--taskbar-h);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border:1px solid rgba(255,255,255,0.03);z-index:40;backdrop-filter:blur(6px)}
+  .slot{display:flex;gap:14px;align-items:center}
+  .icon{width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-size:20px;cursor:pointer;transition:all .12s}
+  .icon:hover{transform:translateY(-4px);box-shadow:0 18px 36px rgba(0,0,0,0.45)}
   .icon:active{transform:scale(.98)}
 
   /* modal overlay */
@@ -89,11 +93,17 @@
   .small{font-size:13px;color:var(--muted)}
   .right-actions{display:flex;gap:8px;align-items:center}
 
+  /* floating health actions */
+  .float-actions{position:fixed;right:20px;bottom:calc(14px + var(--taskbar-h) + 12px);display:flex;flex-direction:column;gap:10px;z-index:120}
+  .fab{width:56px;height:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--gold),#f5d37a);color:#050505;font-weight:700;box-shadow:0 18px 36px rgba(212,175,55,0.18);cursor:pointer;border:none}
+  .fab.small{width:48px;height:48px;background:linear-gradient(180deg,#fff2d0,#ffd66b);font-size:14px}
+
   @media(max-width:900px){
     .panel{padding:12px}
     .cell{min-height:86px}
-    .icon{width:46px;height:46px}
-    .taskbar{left:8px;right:8px}
+    .icon{width:58px;height:58px}
+    .taskbar{left:10px;right:10px}
+    .float-actions{right:12px;bottom:calc(10px + var(--taskbar-h) + 8px)}
   }
 </style>
 </head>
@@ -103,7 +113,7 @@
 <header class="header">
   <div class="brand">
     <div class="title">👑 KING</div>
-    <div class="sub">v5.7.3 — Calendário Vivo</div>
+    <div class="sub">v5.7.4 — Calendário Vivo (Rei Vivo)</div>
   </div>
   <div class="controls">
     <button class="btn" id="saveBtn">Salvar</button>
@@ -130,14 +140,22 @@
     <div class="icon" id="homeBtn" title="Home">🏠</div>
     <div class="icon" id="monthBtn" title="Mês">📅</div>
   </div>
-  <div class="slot center-slot" style="gap:6px">
-    <div class="icon" id="icon1" title="Saúde">💧</div>
-    <div class="icon" id="icon2" title="Agenda">📦</div>
+
+  <div class="slot center-slot" style="gap:18px">
+    <div class="icon" id="healthIcon" title="Saúde">💧</div>
+    <div class="icon" id="agendaIcon" title="Agenda">🗂️</div>
   </div>
+
   <div class="slot right-slot">
-    <div class="icon" id="bauBtn" title="BAÚ">📦</div>
+    <div class="icon" id="bauBtn" title="BAÚ">🧰</div>
     <div class="icon" id="settingsBtn" title="Config">⚙️</div>
   </div>
+</div>
+
+<!-- floating action buttons for health (appear when health modal open) -->
+<div class="float-actions" id="floatActions" style="display:none">
+  <button class="fab" id="fabAddFood" title="Adicionar alimento">🍽</button>
+  <button class="fab small" id="fabAddWater" title="+150 ml">+150</button>
 </div>
 
 <!-- DAY MODAL -->
@@ -156,7 +174,7 @@
     <div class="sections">
       <div class="section">
         <h4>Trabalho</h4>
-        <div class="small">Horário calculado (saída de casa → chegada)</div>
+        <div class="small">Horário calculado (referência de saída/chegada)</div>
         <div style="margin-top:8px" id="workTime" class="small"></div>
       </div>
 
@@ -208,7 +226,7 @@
   </div>
 </div>
 
-<!-- HEALTH PANEL -->
+<!-- HEALTH MODAL -->
 <div class="modal" id="healthModal" aria-hidden="true">
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
     <div class="head">
@@ -225,11 +243,11 @@
       <div>
         <div class="small">Hidratação</div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-          <div style="text-align:center">
+          <div style="text-align:center;cursor:pointer" id="bottleAwrap">
             <div id="hydA" style="font-weight:700;color:var(--gold);font-size:18px">0/4</div>
             <div class="small">Garrafa A</div>
           </div>
-          <div style="text-align:center">
+          <div style="text-align:center;cursor:pointer" id="bottleBwrap">
             <div id="hydB" style="font-weight:700;color:var(--gold);font-size:18px">0/4</div>
             <div class="small">Garrafa B</div>
           </div>
@@ -252,21 +270,41 @@
       </div>
     </div>
 
-    <div style="margin-top:12px;display:flex;justify-content:flex-end">
-      <button class="btn primary" id="confirmHealth">Salvar Saúde</button>
+    <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+      <div class="small">Registre alimentos e água rapidamente</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="btnAddWaterTop">+150 ml</button>
+        <button class="btn primary" id="btnAddFoodTop">Adicionar alimento</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-/* KING v5.7.3a - same features as v5.7.3 with robust init */
-const PREFIX = 'KING_v573_';
+/* KING v5.7.4 - updated features:
+   - taskbar size and spacing
+   - icons mapped to functions (only healthIcon opens health)
+   - precise work time calculation using travel_time / arrival buffer
+   - floating action buttons for health (+150 ml and add food)
+   - add-food prompt adds calories to today's record
+   - all data stored in localStorage with prefix
+*/
+
+/* storage keys & defaults */
+const PREFIX = 'KING_v574_';
 const KEY_DAY = PREFIX + 'days';
 const KEY_HYD = PREFIX + 'hydration';
 const KEY_HEALTH = PREFIX + 'health';
 const META = { kcal:2606, agua:2100, sono:8 };
+
+/* folgas */
 const FOLGAS = new Set([4,9,18,23,24]);
 
+/* travel params */
+const TRAVEL_MIN = 60; // minutes travel time (user: 1 hour)
+const ARRIVE_BUFFER_MIN = 20; // arrive 20 minutes early
+
+/* helpers */
 function load(key, fallback){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : fallback; }catch(e){ return fallback; } }
 function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
@@ -274,6 +312,7 @@ let days = load(KEY_DAY, {});
 let hydration = load(KEY_HYD, {bottles:[0,0], extra:0});
 let health = load(KEY_HEALTH, {});
 
+/* DOM refs */
 const weekHead = document.getElementById('weekHead');
 const calendarGrid = document.getElementById('calendarGrid');
 const monthlyFill = document.getElementById('monthlyFill');
@@ -298,8 +337,13 @@ const deleteDayBtn = document.getElementById('deleteDay');
 const closeDayBtn = document.getElementById('closeDay');
 
 const healthModal = document.getElementById('healthModal');
-const openHealthIcons = document.querySelectorAll('#icon1,#homeBtn,#icon2');
-const closeHealthBtn = document.getElementById('closeHealth');
+const healthIcon = document.getElementById('healthIcon');
+const agendaIcon = document.getElementById('agendaIcon');
+const bauIcon = document.getElementById('bauBtn');
+const settingsIcon = document.getElementById('settingsBtn');
+const homeBtn = document.getElementById('homeBtn');
+const monthBtn = document.getElementById('monthBtn');
+
 const hydA = document.getElementById('hydA');
 const hydB = document.getElementById('hydB');
 const add25Btn = document.getElementById('add25');
@@ -308,15 +352,68 @@ const kcalToday = document.getElementById('kcalToday');
 const sleepToday = document.getElementById('sleepToday');
 const trainToday = document.getElementById('trainToday');
 const confirmHealthBtn = document.getElementById('confirmHealth');
+const bottleAwrap = document.getElementById('bottleAwrap');
+const bottleBwrap = document.getElementById('bottleBwrap');
+const btnAddWaterTop = document.getElementById('btnAddWaterTop');
+const btnAddFoodTop = document.getElementById('btnAddFoodTop');
 
+const floatActions = document.getElementById('floatActions');
+const fabAddFood = document.getElementById('fabAddFood');
+const fabAddWater = document.getElementById('fabAddWater');
+
+/* date helpers */
 function pad(n){ return String(n).padStart(2,'0'); }
 function keyFrom(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
 function todayKey(){ const n=new Date(); return keyFrom(n.getFullYear(), n.getMonth()+1, n.getDate()); }
 function prettyKey(k){ const p=k.split('-'); return new Date(p[0], p[1]-1, p[2]).toLocaleDateString(); }
 
+/* week header */
 const weekdayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 function renderWeekHead(){ weekHead.innerHTML=''; weekdayNames.forEach(n=>{ const w=document.createElement('div'); w.className='wday'; w.innerText=n; weekHead.appendChild(w); }); }
 
+/* compute work shifts (base) */
+function getShiftTimesForWeekday(dateObj){
+  // returns object with shift_start (Date), shift_end (Date)
+  // note: returns null if day is folga? We'll still return shift times defined for each weekday
+  const year = dateObj.getFullYear(), month = dateObj.getMonth(), day = dateObj.getDate();
+  const wd = dateObj.getDay(); // 0 Sun - 6 Sat
+  // default times as strings "HH:MM" local
+  const map = {
+    0: {start:'15:00', end:'00:20'}, // Sunday
+    1: {start:'14:00', end:'22:20'}, // Monday
+    2: {start:'14:00', end:'22:20'}, // Tue
+    3: {start:'18:00', end:'01:20'}, // Wed
+    4: {start:'19:00', end:'02:20'}, // Thu
+    5: {start:'19:00', end:'02:20'}, // Fri
+    6: {start:'19:00', end:'02:20'}  // Sat
+  };
+  const times = map[wd];
+  // parse start
+  const [sh,sm] = times.start.split(':').map(Number);
+  const [eh,em] = times.end.split(':').map(Number);
+  // shift_start date object:
+  const startDT = new Date(year, month, day, sh, sm);
+  // For end, if end hour less than start hour (overnight), add 1 day
+  let endDT = new Date(year, month, day, eh, em);
+  if(endDT <= startDT) endDT = new Date(endDT.getTime() + 24*60*60*1000);
+  return { start: startDT, end: endDT };
+}
+
+/* Build human-readable work schedule with travel/time buffers */
+function formatWorkReference(dateObj){
+  const shift = getShiftTimesForWeekday(dateObj);
+  const travelMs = TRAVEL_MIN * 60 * 1000;
+  const bufferMs = ARRIVE_BUFFER_MIN * 60 * 1000;
+  const arrivalAtWork = new Date(shift.start.getTime() - bufferMs);
+  const departHome = new Date(arrivalAtWork.getTime() - travelMs);
+  const departWork = shift.end; // leave shop at end time
+  const arriveHome = new Date(departWork.getTime() + travelMs);
+  // format times
+  function fmt(d){ return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+  return `Saída de casa (ref): ${fmt(departHome)} — Chegada ao trabalho (ref): ${fmt(arrivalAtWork)}\nSaída do serviço: ${fmt(departWork)} — Chegada em casa (ref): ${fmt(arriveHome)}`;
+}
+
+/* render calendar month (starts Sunday) */
 function renderCalendar(){
   if(!calendarGrid) return;
   calendarGrid.innerHTML='';
@@ -325,7 +422,10 @@ function renderCalendar(){
   const firstWeekday = new Date(Y,M,1).getDay();
   const daysInMonth = new Date(Y,M+1,0).getDate();
 
-  for(let i=0;i<firstWeekday;i++){ const blank=document.createElement('div'); calendarGrid.appendChild(blank); }
+  for(let i=0;i<firstWeekday;i++){
+    const blank=document.createElement('div');
+    calendarGrid.appendChild(blank);
+  }
 
   for(let d=1; d<=daysInMonth; d++){
     const cell = document.createElement('div');
@@ -344,215 +444,4 @@ function renderCalendar(){
     const today = new Date();
     if(M === today.getMonth()){
       if(d < today.getDate()) cell.classList.add('past');
-      if(d === today.getDate()) cell.classList.add('today');
-    } else {
-      // if viewing another month, do not mark past/today relative to current month
-    }
-
-    if(FOLGAS.has(d)) { cell.classList.add('folga'); const t=document.createElement('div'); t.className='tag'; t.innerText='Folga'; cell.appendChild(t); }
-
-    cell.onclick = ()=> openDayModal(Y,M,d,k);
-
-    calendarGrid.appendChild(cell);
-  }
-
-  updateMonthlyProgress();
-}
-
-/* monthly progress calculation */
-function updateMonthlyProgress(){
-  const now=new Date(); const Y=now.getFullYear(); const M=now.getMonth()+1;
-  const daysInMonth = new Date(Y,M,0).getDate();
-  let sum=0,count=0;
-  for(let d=1; d<=daysInMonth; d++){
-    const k=keyFrom(Y,M,d);
-    if(health[k] && typeof health[k].equilibrium==='number'){ sum += health[k].equilibrium; count++; }
-  }
-  const avg = count ? Math.round(sum/count) : 0;
-  document.getElementById('monthlyFill').style.width = Math.min(100, avg) + '%';
-}
-
-/* work time heuristic */
-function getWorkTime(y,m,d){
-  const wd = new Date(y,m,d).getDay();
-  switch(wd){
-    case 0: return '15:00 → 00:20 (Dom)';
-    case 1: return '14:00 → 22:20 (Seg)';
-    case 2: return '14:00 → 22:20 (Ter)';
-    case 3: return '18:00 → 01:20 (Qua)';
-    case 4: return '19:00 → 02:20 (Qui)';
-    case 5: return '19:00 → 02:20 (Sex)';
-    case 6: return '19:00 → 02:20 (Sáb)';
-    default: return '';
-  }
-}
-
-/* Day modal logic */
-let currentOpenKey = null;
-function openDayModal(year, monthZeroBased, dayNum, key){
-  currentOpenKey = key;
-  dayTitle.innerText = `Dia ${dayNum}`;
-  daySubtitle.innerText = prettyKey(key);
-  workTimeEl.innerText = getWorkTime(year, monthZeroBased, dayNum);
-
-  days[key] = days[key] || { meals: null, plannedShakes: [{when:'Pré-trabalho',kcal:711,creatina:true,confirmed:false},{when:'Pós-treino',kcal:711,creatina:false,confirmed:false}], kcal:0, transactions: [], exercises:'', chores:''};
-
-  const ms = generateMealsForDay(key);
-  renderMealsContainer(ms);
-
-  trainIntensity.value = days[key].train ? days[key].train.intensity || 'moderate' : 'moderate';
-  trainDuration.value = days[key].train ? (days[key].train.duration || 1.5) : 1.5;
-
-  renderTransactions(days[key].transactions || []);
-  exList.value = days[key].exercises || '';
-  chores.value = days[key].chores || '';
-
-  dayModal.style.display = 'flex';
-}
-
-function generateMealsForDay(key){
-  if(days[key] && days[key].meals) return days[key].meals;
-  return [
-    {label:'Café', items:['2 ovos','1 banana','pão'], kcal:480},
-    {label:'Almoço', items:['150g arroz','200g purê','proteína'], kcal:700},
-    {label:'Lanche', items:['granola','mel'], kcal:220},
-    {label:'Jantar', items:['150g arroz','2 ovos'], kcal:520},
-    {label:'Pós-treino', items:['75g anabolico','banana','300ml leite'], kcal:711}
-  ];
-}
-
-function renderMealsContainer(meals){
-  mealsContainer.innerHTML = '';
-  meals.forEach((m, idx)=>{
-    const box = document.createElement('div');
-    box.style.marginBottom = '10px';
-    box.innerHTML = `<strong>${m.label}</strong><div class="small" style="margin-top:6px">${m.items.join(', ')}</div><div class="small" style="margin-top:6px">≈ ${m.kcal} kcal</div>`;
-    const edit = document.createElement('button'); edit.className='btn'; edit.style.marginTop='6px'; edit.innerText='Editar';
-    edit.onclick = ()=>{
-      const newTxt = prompt('Editar itens (separe por vírgula)', m.items.join(', '));
-      if(newTxt!==null){ m.items = newTxt.split(',').map(s=>s.trim()); days[currentOpenKey].meals = meals; save(KEY_DAY, days); }
-    };
-    box.appendChild(edit);
-    mealsContainer.appendChild(box);
-  });
-}
-
-/* transactions */
-function renderTransactions(list){
-  txList.innerHTML = '';
-  list.forEach((t, i)=>{
-    const div = document.createElement('div'); div.className='small'; div.style.display='flex'; div.style.justifyContent='space-between'; div.style.marginTop='6px';
-    div.innerHTML = `<div>${t.desc}</div><div>R$ ${Number(t.val).toFixed(2)} <button style="margin-left:8px" class="btn" data-i="${i}">x</button></div>`;
-    txList.appendChild(div);
-  });
-  txList.querySelectorAll('button').forEach(b=>{
-    b.onclick = (e)=>{
-      const i = Number(e.target.getAttribute('data-i'));
-      days[currentOpenKey].transactions.splice(i,1);
-      renderTransactions(days[currentOpenKey].transactions);
-    };
-  });
-}
-addTxBtn.onclick = ()=>{
-  const desc = txDesc.value.trim();
-  const val = Number(txValue.value || 0);
-  if(!desc || !val){ alert('Preencha descrição e valor. (use negativo para gastar)'); return; }
-  days[currentOpenKey].transactions.push({desc, val});
-  txDesc.value = ''; txValue.value = '';
-  renderTransactions(days[currentOpenKey].transactions);
-};
-
-saveDayBtn.onclick = ()=>{
-  days[currentOpenKey].train = { intensity: trainIntensity.value, duration: Number(trainDuration.value || 1.5) };
-  days[currentOpenKey].exercises = exList.value || '';
-  days[currentOpenKey].chores = chores.value || '';
-  const meals = generateMealsForDay(currentOpenKey);
-  days[currentOpenKey].meals = meals;
-  days[currentOpenKey].foodShort = meals.map(m=>m.label).join(', ');
-  save(KEY_DAY, days);
-  renderCalendar();
-  dayModal.style.display = 'none';
-};
-
-deleteDayBtn.onclick = ()=>{
-  if(confirm('Apagar todos os dados desse dia?')){ delete days[currentOpenKey]; save(KEY_DAY, days); renderCalendar(); dayModal.style.display='none'; }
-};
-closeDayBtn.onclick = ()=> { dayModal.style.display = 'none'; };
-
-/* Health UI */
-function updateHydUI(){
-  const total = (hydration.bottles[0] + hydration.bottles[1]) * 125 + (hydration.extra || 0);
-  hydA.innerText = hydration.bottles[0] + '/4';
-  hydB.innerText = hydration.bottles[1] + '/4';
-  waterTotal.innerText = total;
-  kcalToday.innerText = (days[todayKey()]?.kcal || 0) + ' / ' + META.kcal;
-  sleepToday.innerText = (days[todayKey()]?.sleep || 0) + ' / ' + META.sono + 'h';
-  trainToday.innerText = (days[todayKey()]?.train ? days[todayKey()].train.intensity + ' • ' + days[todayKey()].train.duration + 'h' : '—');
-  save(KEY_HYD, hydration);
-}
-function toggleBottle(i){ hydration.bottles[i] = Math.min(4, (hydration.bottles[i]||0) + 1); updateHydUI(); }
-add25Btn.onclick = ()=> { hydration.extra = (hydration.extra||0) + 25; updateHydUI(); };
-hydA.parentElement.onclick = ()=> toggleBottle(0);
-hydB.parentElement.onclick = ()=> toggleBottle(1);
-
-const openHealthIconsArr = Array.from(openHealthIcons);
-openHealthIconsArr.forEach(el=> el.onclick = ()=> { healthModal.style.display = 'flex'; updateHydUI(); });
-
-closeHealthBtn.onclick = ()=> { healthModal.style.display = 'none'; };
-confirmHealthBtn.onclick = ()=> { save(KEY_DAY, days); save(KEY_HYD, hydration); alert('Dados salvos'); healthModal.style.display='none'; };
-
-/* save/export */
-saveBtn.onclick = ()=> { save(KEY_DAY, days); save(KEY_HYD, hydration); save(KEY_HEALTH, health); alert('Salvo localmente.'); };
-exportBtn.onclick = ()=> { const blob = new Blob([JSON.stringify({days,hydration,health},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='KING_backup_'+(new Date().toISOString().slice(0,10))+'.json'; document.body.appendChild(a); a.click(); a.remove(); };
-
-/* equilibrium & monthly */
-function recalcTodayEquilibrium(){
-  const k = todayKey();
-  const agua = (hydration.bottles[0] + hydration.bottles[1]) * 125 + (hydration.extra||0);
-  const kcalPct = Math.min(1, (days[k]?.kcal || 0) / META.kcal);
-  const aguaPct = Math.min(1, agua / META.agua);
-  const sonoPct = Math.min(1, (days[k]?.sleep || 0) / META.sono);
-  const treinoPct = Math.min(1, (days[k]?.train ? 1 : 0));
-  const eq = Math.round((aguaPct*0.25 + kcalPct*0.25 + sonoPct*0.25 + treinoPct*0.20) * 100);
-  health[k] = health[k] || {}; health[k].equilibrium = eq;
-  save(KEY_HEALTH, health);
-  updateMonthlyProgress();
-}
-
-/* Robust init: wait DOMContentLoaded then init; also retry if calendar empty */
-function initAll(){
-  renderWeekHead();
-  renderCalendar();
-  updateHydUI();
-  recalcTodayEquilibrium();
-
-  // failsafe: if grid still empty after short delay, retry a couple times
-  setTimeout(()=> {
-    if(!calendarGrid || calendarGrid.children.length === 0){
-      // try again a few times
-      let tries = 0;
-      const t = setInterval(()=>{
-        tries++;
-        try{ renderCalendar(); }catch(e){}
-        if(calendarGrid.children.length>0 || tries>6) clearInterval(t);
-      }, 300);
-    }
-  }, 200);
-}
-
-// ensure DOM ready before running (fixes mobile timing)
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initAll);
-} else {
-  // already loaded
-  setTimeout(initAll, 50);
-}
-
-/* close modals on outside click */
-window.addEventListener('click', (e)=>{
-  if(e.target === dayModal) dayModal.style.display='none';
-  if(e.target === healthModal) healthModal.style.display='none';
-});
-</script>
-</body>
-</html>
+      if(d === today.getDate()) cell.classL

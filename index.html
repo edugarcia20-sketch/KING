@@ -3,49 +3,51 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>KING — v5.8 Tema Imperial (Escuro Poppins)</title>
+<title>KING — Calendário (Imperial Refinado)</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<meta name="theme-color" content="#121212">
+<meta name="theme-color" content="#1b1b1b">
 <style>
   :root{
-    --bg:#121212;           /* fundo escuro equilibrado (opção B) */
-    --day:#202020;          /* caixas dos dias */
-    --card:#171717;
-    --muted:#aeb6bd;
-    --text:#e0e0e0;         /* branco prateado */
-    --gold:#bfa14a;         /* dourado metálico suave (opção B) */
+    /* base ajustado 40% mais claro mantendo tom */
+    --bg:#1b1b1b;           /* fundo (mais claro) */
+    --day:#2a2a2a;          /* caixas dos dias */
+    --card:#222222;
+    --muted:#b6bcc2;
+    --text:#f3f3f3;         /* branco suave */
+    --gold:#c6b25a;         /* dourado metálico suave (ajustado) */
     --red:#8b0000;
     --smoke:rgba(255,255,255,0.06);
-    --smoke-weak:rgba(255,255,255,0.04);
     --glass:rgba(255,255,255,0.02);
-    --taskbar-h:92px;
+    --taskbar-h:90px;
+    --transition:200ms;
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;-webkit-font-smoothing:antialiased}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;-webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
   a{color:inherit;text-decoration:none}
 
-  /* Header */
+  /* header */
   .header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
   .brand{display:flex;flex-direction:column}
   .brand .title{font-weight:700;color:var(--gold);letter-spacing:0.4px}
   .brand .sub{font-size:12px;color:var(--muted);margin-top:4px}
   .controls{display:flex;gap:8px;align-items:center}
-  .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--text);cursor:pointer;font-size:13px}
-  .btn.primary{background:linear-gradient(180deg,var(--gold),#d8c370);border:0;color:#121212;font-weight:700}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--text);cursor:pointer;font-size:13px;transition:all var(--transition) ease}
+  .btn:hover{transform:translateY(-3px)}
+  .btn.primary{background:linear-gradient(180deg,var(--gold),#d8c370);border:0;color:#1b1b1b;font-weight:700;box-shadow:0 8px 20px rgba(198,178,90,0.12)}
 
-  /* monthly thin bar */
+  /* monthly bar */
   .monthly-wrap{padding:10px 14px}
   .monthly-bar{height:6px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.03);overflow:hidden}
   .monthly-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),#e6d990);transition:width .6s ease}
 
-  /* main calendar area */
+  /* main calendar */
   main{flex:1;display:block;height:calc(100vh - 176px);overflow:auto;padding:14px}
   .calendar{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
   .weeknames{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
   .wday{font-weight:700;text-align:center;color:var(--muted);font-size:13px}
   .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
   .cell{
-    background:linear-gradient(180deg,var(--day), #1a1a1a);
+    background:linear-gradient(180deg,var(--day), #262626);
     min-height:96px;
     border-radius:12px;
     padding:10px;
@@ -55,34 +57,37 @@
     flex-direction:column;
     justify-content:flex-start;
     align-items:flex-start;
-    transition:all .14s ease;
+    transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
     cursor:pointer;
     color:var(--text);
+    overflow:hidden;
   }
-  .cell:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(0,0,0,0.6)}
+  .cell:hover{transform:translateY(-6px);box-shadow:0 26px 56px rgba(0,0,0,0.55)}
   .cell .num{font-weight:700;font-size:18px}
-  .cell .preview{font-size:13px;color:var(--muted);margin-top:8px;max-width:100%}
-  .cell.past{opacity:0.55;filter:grayscale(.04)}
-  .cell.today{outline:3px solid rgba(191,161,74,0.12);box-shadow:0 10px 36px rgba(191,161,74,0.04)}
-  .cell.folga{background:linear-gradient(180deg, rgba(139,0,0,0.14), rgba(139,0,0,0.06));border:1px solid rgba(139,0,0,0.12)}
-  .cell .tag{position:absolute;right:8px;bottom:8px;font-size:11px;color:rgba(255,255,255,0.85)}
+  .cell .preview{font-size:13px;color:var(--muted);margin-top:8px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cell.past{opacity:0.58;filter:grayscale(.04)}
+  .cell.today{outline:3px solid rgba(198,178,90,0.12);box-shadow:0 10px 36px rgba(198,178,90,0.04)}
+  .cell.folga{background:linear-gradient(180deg, rgba(139,0,0,0.12), rgba(139,0,0,0.05));border:1px solid rgba(139,0,0,0.10)}
+  .cell .tag{position:absolute;right:8px;bottom:8px;font-size:11px;color:rgba(255,255,255,0.92)}
 
-  /* TASKBAR */
-  .taskbar{position:fixed;left:12px;right:12px;bottom:12px;height:var(--taskbar-h);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border:1px solid rgba(255,255,255,0.03);z-index:40;backdrop-filter:blur(6px)}
-  .slot{display:flex;gap:14px;align-items:center}
-  .icon{width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-size:20px;cursor:pointer;transition:all .12s}
+  /* taskbar fixed */
+  .taskbar{position:fixed;left:12px;right:12px;bottom:12px;height:var(--taskbar-h);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border:1px solid rgba(255,255,255,0.03);z-index:60;backdrop-filter:blur(6px)}
+  .slot{display:flex;gap:18px;align-items:center}
+  .icon{width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-size:20px;cursor:pointer;transition:all var(--transition) ease}
   .icon:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,0.45)}
   .icon:active{transform:scale(.98)}
-  .icon.active{border-color:rgba(191,161,74,0.18);color:var(--gold)}
+  .icon.active{border-color:rgba(198,178,90,0.18);color:var(--gold)}
 
   /* modal overlay */
-  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6));z-index:90;padding:12px}
-  .panel{width:100%;max-width:980px;background:linear-gradient(180deg,#0e0e0e,#0a0a0a);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 40px 120px rgba(0,0,0,0.6)}
+  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6));z-index:120;padding:12px}
+  .panel{width:100%;max-width:980px;background:linear-gradient(180deg,#171717,#0f0f0f);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 40px 120px rgba(0,0,0,0.6);animation:panelIn .28s ease}
+  @keyframes panelIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
   .panel .head{display:flex;justify-content:space-between;align-items:center}
   .panel .head h3{margin:0}
   .close-x{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
 
-  /* day modal body */
+  /* modal content */
   .sections{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
   .section{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
   .section h4{margin:0 0 6px 0;font-size:14px}
@@ -92,26 +97,27 @@
   .small{font-size:13px;color:var(--muted)}
 
   /* floating health actions */
-  .float-actions{position:fixed;right:18px;bottom:calc(12px + var(--taskbar-h) + 12px);display:flex;flex-direction:column;gap:10px;z-index:120}
-  .fab{width:56px;height:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--gold),#d6bf68);color:#121212;font-weight:700;box-shadow:0 18px 36px rgba(191,161,74,0.14);cursor:pointer;border:none}
+  .float-actions{position:fixed;right:18px;bottom:calc(12px + var(--taskbar-h) + 12px);display:flex;flex-direction:column;gap:10px;z-index:140}
+  .fab{width:56px;height:56px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--gold),#d6bf68);color:#121212;font-weight:700;box-shadow:0 18px 36px rgba(198,178,90,0.14);cursor:pointer;border:none;transition:transform var(--transition)}
   .fab.small{width:48px;height:48px;background:linear-gradient(180deg,#fff6df,#ffd66b);font-size:14px}
+  .fab:active{transform:scale(.96)}
 
   @media(max-width:900px){
     .panel{padding:12px}
     .cell{min-height:86px}
     .icon{width:58px;height:58px}
-    .taskbar{left:10px;right:10px}
+    .taskbar{left:8px;right:8px}
     .float-actions{right:12px;bottom:calc(10px + var(--taskbar-h) + 8px)}
   }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- header -->
 <header class="header">
   <div class="brand">
     <div class="title">👑 KING</div>
-    <div class="sub">v5.8 — Tema Imperial</div>
+    <div class="sub">Tema Imperial — Refinado</div>
   </div>
   <div class="controls">
     <button class="btn" id="saveBtn">Salvar</button>
@@ -119,20 +125,20 @@
   </div>
 </header>
 
-<!-- MONTHLY -->
+<!-- monthly progress -->
 <div class="monthly-wrap">
   <div class="monthly-bar"><div id="monthlyFill" class="monthly-fill"></div></div>
 </div>
 
-<!-- MAIN CALENDAR -->
+<!-- main calendar -->
 <main>
   <div class="calendar" role="application" aria-label="Calendário do mês">
     <div class="weeknames" id="weekHead"></div>
-    <div id="calendarGrid" class="grid" role="grid" aria-live="polite"></div>
+    <div id="calendarGrid" class="grid" role="grid" aria-live="polite" aria-label="Dias do mês"></div>
   </div>
 </main>
 
-<!-- TASKBAR (no ícone Home; inicia em calendário) -->
+<!-- taskbar -->
 <div class="taskbar" role="navigation" aria-label="Barra de tarefas">
   <div class="slot left-slot">
     <div class="icon active" id="monthBtn" title="Calendário">📅</div>
@@ -149,13 +155,13 @@
   </div>
 </div>
 
-<!-- floating action buttons for health (appear when health modal open) -->
-<div class="float-actions" id="floatActions" style="display:none">
+<!-- floating action buttons (health) -->
+<div class="float-actions" id="floatActions" style="display:none" aria-hidden="true">
   <button class="fab" id="fabAddFood" title="Adicionar alimento">🍽</button>
   <button class="fab small" id="fabAddWater" title="+150 ml">+150</button>
 </div>
 
-<!-- DAY MODAL -->
+<!-- Day modal -->
 <div class="modal" id="dayModal" aria-hidden="true">
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
     <div class="head">
@@ -171,8 +177,8 @@
     <div class="sections">
       <div class="section">
         <h4>Trabalho</h4>
-        <div class="small">Horário calculado (referência de saída/chegada)</div>
-        <div style="margin-top:8px" id="workTime" class="small"></div>
+        <div class="small">Horário calculado (referência saída/chegada)</div>
+        <div style="margin-top:8px;white-space:pre-line" id="workTime" class="small"></div>
       </div>
 
       <div class="section">
@@ -223,7 +229,7 @@
   </div>
 </div>
 
-<!-- HEALTH MODAL -->
+<!-- Health modal -->
 <div class="modal" id="healthModal" aria-hidden="true">
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
     <div class="head">
@@ -278,29 +284,30 @@
 </div>
 
 <script>
-/* KING v5.8 - Tema Imperial (opções aplicadas)
-   - fundo #121212, day #202020
-   - gold #bfa14a
-   - start at calendar (removed Home icon)
-   - travel 60 min, arrival buffer 20 min
-   - health FABs: +150 ml and Add Food
+/* KING v5.8.1 — Tema Imperial Refinado
+   - fundo mais claro 40%
+   - calendar default
+   - taskbar fixed 90px
+   - health and bau accessible in taskbar
+   - travel 60 min, buffer 20 min
+   - animations sutis
+   - localStorage persistence
 */
 
-/* storage keys & defaults */
-const PREFIX = 'KING_v58_';
+const PREFIX = 'KING_v581_';
 const KEY_DAY = PREFIX + 'days';
 const KEY_HYD = PREFIX + 'hydration';
 const KEY_HEALTH = PREFIX + 'health';
 const META = { kcal:2606, agua:2100, sono:8 };
 
-/* folgas */
+/* user folgas (dados fornecidos) */
 const FOLGAS = new Set([4,9,18,23,24]);
 
 /* travel params */
-const TRAVEL_MIN = 60; // minutos
-const ARRIVE_BUFFER_MIN = 20; // minutos
+const TRAVEL_MIN = 60;
+const ARRIVE_BUFFER_MIN = 20;
 
-/* helpers */
+/* storage helpers */
 function load(key, fallback){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : fallback; }catch(e){ return fallback; } }
 function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
@@ -346,7 +353,6 @@ const waterTotal = document.getElementById('waterTotal');
 const kcalToday = document.getElementById('kcalToday');
 const sleepToday = document.getElementById('sleepToday');
 const trainToday = document.getElementById('trainToday');
-const confirmHealthBtn = document.getElementById('confirmHealth');
 const bottleAwrap = document.getElementById('bottleAwrap');
 const bottleBwrap = document.getElementById('bottleBwrap');
 const btnAddWaterTop = document.getElementById('btnAddWaterTop');
@@ -366,18 +372,18 @@ function prettyKey(k){ const p=k.split('-'); return new Date(p[0], p[1]-1, p[2])
 const weekdayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 function renderWeekHead(){ weekHead.innerHTML=''; weekdayNames.forEach(n=>{ const w=document.createElement('div'); w.className='wday'; w.innerText=n; weekHead.appendChild(w); }); }
 
-/* shift times generation */
+/* shift generation */
 function getShiftTimesForWeekday(dateObj){
   const year = dateObj.getFullYear(), month = dateObj.getMonth(), day = dateObj.getDate();
   const wd = dateObj.getDay();
   const map = {
-    0: {start:'15:00', end:'00:20'}, // Sun
-    1: {start:'14:00', end:'22:20'}, // Mon
-    2: {start:'14:00', end:'22:20'}, // Tue
-    3: {start:'18:00', end:'01:20'}, // Wed
-    4: {start:'19:00', end:'02:20'}, // Thu
-    5: {start:'19:00', end:'02:20'}, // Fri
-    6: {start:'19:00', end:'02:20'}  // Sat
+    0: {start:'15:00', end:'00:20'},
+    1: {start:'14:00', end:'22:20'},
+    2: {start:'14:00', end:'22:20'},
+    3: {start:'18:00', end:'01:20'},
+    4: {start:'19:00', end:'02:20'},
+    5: {start:'19:00', end:'02:20'},
+    6: {start:'19:00', end:'02:20'}
   };
   const times = map[wd];
   const [sh,sm] = times.start.split(':').map(Number);
@@ -437,18 +443,4 @@ function renderCalendar(){
       const t=document.createElement('div'); t.className='tag'; t.innerText='Folga'; cell.appendChild(t);
     }
 
-    cell.onclick = ()=> openDayModal(Y,M,d,k);
-    calendarGrid.appendChild(cell);
-  }
-
-  updateMonthlyProgress();
-}
-
-/* monthly progress */
-function updateMonthlyProgress(){
-  const now=new Date(); const Y=now.getFullYear(); const M=now.getMonth()+1;
-  const daysInMonth = new Date(Y,M,0).getDate();
-  let sum=0,count=0;
-  for(let d=1; d<=daysInMonth; d++){
-    const k=keyFrom(Y,M,d);
-    if(health[k] && typeof health[k].equ
+    cell.onclick = ()=> openDayMod

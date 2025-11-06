@@ -1,177 +1,471 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KING v5.7.2 – Calendário Vivo Restaurado</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-    body {
-      background-color: #0a0a0a;
-      color: #fff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>KING — v5.7.3 Calendário Vivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0a0a0a">
+<style>
+  :root{
+    --bg:#050505;
+    --card:#0e0e0e;
+    --muted:#b6bcc2;
+    --text:#f6f6f6;
+    --gold:#d4af37;
+    --red:#8b0000;
+    --smoke:rgba(255,255,255,0.10); /* cinza-fumaça "aceso" */
+    --smoke-weak:rgba(255,255,255,0.06);
+    --glass:rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
 
-    header {
-      text-align: center;
-      padding: 12px 0;
-      background: #000;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      position: relative;
-    }
-    header h1 { font-size: 1.2rem; color: #d4af37; }
+  /* header */
+  .header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+  .brand{display:flex;flex-direction:column}
+  .brand .title{font-weight:700;color:var(--gold);letter-spacing:0.4px}
+  .brand .sub{font-size:12px;color:var(--muted);margin-top:4px}
+  .controls{display:flex;gap:8px;align-items:center}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.05);padding:8px 10px;border-radius:10px;color:var(--text);cursor:pointer;font-size:13px}
+  .btn.primary{background:linear-gradient(90deg,var(--gold),#ffd66b);border:0;color:#050505;font-weight:700}
 
-    .progress-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 4px;
-      width: 25%;
-      background: linear-gradient(90deg, #d4af37, #8b0000);
-      border-radius: 2px;
-      opacity: 0.8;
-    }
+  /* monthly thin bar */
+  .monthly-wrap{padding:10px 14px}
+  .monthly-bar{height:6px;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.03);overflow:hidden}
+  .monthly-fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ffd66b);transition:width .6s ease}
 
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-auto-rows: 1fr;
-      gap: 8px;
-      padding: 10px;
-      justify-items: center;
-      align-items: center;
-    }
+  /* calendar grid */
+  main{flex:1;display:block;height:calc(100vh - 172px);overflow:auto;padding:14px}
+  .calendar{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  .weeknames{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+  .wday{font-weight:700;text-align:center;color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+  .cell{
+    background:var(--smoke);
+    min-height:96px;
+    border-radius:12px;
+    padding:10px;
+    border:1px solid rgba(255,255,255,0.03);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:flex-start;
+    transition:all .14s ease;
+    cursor:pointer;
+  }
+  .cell:hover{transform:translateY(-6px);box-shadow:0 22px 48px rgba(0,0,0,0.6)}
+  .cell .num{font-weight:700;font-size:18px}
+  .cell .preview{font-size:13px;color:var(--muted);margin-top:8px}
+  .cell.past{opacity:0.6;filter:grayscale(.02)}
+  .cell.today{outline:3px solid rgba(212,175,55,0.12);box-shadow:0 10px 36px rgba(212,175,55,0.04)}
+  .cell.folga{background:linear-gradient(180deg, rgba(139,0,0,0.12), rgba(139,0,0,0.04));border:1px solid rgba(139,0,0,0.12)}
+  .cell .tag{position:absolute;right:8px;bottom:8px;font-size:11px;color:rgba(255,255,255,0.85)}
 
-    .day {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s ease;
-      position: relative;
-    }
+  /* footer taskbar */
+  .taskbar{position:fixed;left:12px;right:12px;bottom:12px;height:74px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border:1px solid rgba(255,255,255,0.03);z-index:40;backdrop-filter:blur(6px)}
+  .slot{display:flex;gap:12px;align-items:center}
+  .icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);font-size:20px;cursor:pointer}
+  .icon:active{transform:scale(.98)}
 
-    .day:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: scale(1.03);
-      box-shadow: 0 0 10px rgba(212,175,55,0.2);
-    }
+  /* modal overlay */
+  .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6));z-index:90;padding:12px}
+  .panel{width:100%;max-width:920px;background:linear-gradient(180deg,#0b0b0b,#0a0a0a);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 40px 120px rgba(0,0,0,0.6)}
+  .panel .head{display:flex;justify-content:space-between;align-items:center}
+  .panel .head h3{margin:0}
+  .close-x{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
 
-    .day.past { opacity: 0.35; }
-    .day.today { border: 2px solid #d4af37; }
-    .day.folga {
-      background: rgba(139, 0, 0, 0.35);
-      border: 1px solid rgba(139, 0, 0, 0.45);
-    }
+  /* day modal body */
+  .sections{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .section{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02)}
+  .section h4{margin:0 0 6px 0;font-size:14px}
+  .row{display:flex;gap:8px;align-items:center}
+  textarea, input, select{width:100%;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);resize:vertical}
+  textarea{min-height:60px}
 
-    .day.folga span.note {
-      position: absolute;
-      bottom: 4px;
-      right: 6px;
-      font-size: 0.55rem;
-      color: rgba(255, 255, 255, 0.7);
-    }
+  /* small */
+  .small{font-size:13px;color:var(--muted)}
+  .right-actions{display:flex;gap:8px;align-items:center}
 
-    footer {
-      background: rgba(255, 255, 255, 0.03);
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      position: relative;
-    }
-
-    .icon-btn {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.4rem;
-      cursor: pointer;
-    }
-
-    .gota {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #d4af37;
-      color: #0a0a0a;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      box-shadow: 0 0 12px rgba(212,175,55,0.5);
-    }
-
-    .gota:active { transform: translateX(-50%) scale(0.96); }
-  </style>
+  @media(max-width:900px){
+    .panel{padding:12px}
+    .cell{min-height:86px}
+    .icon{width:46px;height:46px}
+    .taskbar{left:8px;right:8px}
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>👑 KING</h1>
-    <div class="progress-bar"></div>
-  </header>
 
-  <main id="calendar"></main>
+<!-- HEADER -->
+<header class="header">
+  <div class="brand">
+    <div class="title">👑 KING</div>
+    <div class="sub">v5.7.3 — Calendário Vivo</div>
+  </div>
+  <div class="controls">
+    <button class="btn" id="saveBtn">Salvar</button>
+    <button class="btn" id="exportBtn">Exportar</button>
+  </div>
+</header>
 
-  <footer>
-    <button class="icon-btn">🏠</button>
-    <button class="icon-btn">📅</button>
-    <div class="gota" id="openHealth">💧</div>
-    <button class="icon-btn">📦</button>
-    <button class="icon-btn">⚙️</button>
-  </footer>
+<!-- MONTHLY -->
+<div class="monthly-wrap">
+  <div class="monthly-bar"><div id="monthlyFill" class="monthly-fill"></div></div>
+</div>
 
-  <script>
-    const folgas = [4, 9, 18, 23, 24];
+<!-- MAIN CALENDAR -->
+<main>
+  <div class="calendar" role="application" aria-label="Calendário do mês">
+    <div class="weeknames" id="weekHead"></div>
+    <div id="calendarGrid" class="grid" role="grid" aria-live="polite"></div>
+  </div>
+</main>
+
+<!-- TASKBAR -->
+<div class="taskbar" role="navigation" aria-label="Barra de tarefas">
+  <div class="slot left-slot">
+    <div class="icon" id="homeBtn" title="Home">🏠</div>
+    <div class="icon" id="monthBtn" title="Mês">📅</div>
+  </div>
+  <div class="slot center-slot" style="gap:6px">
+    <div class="icon" id="icon1" title="Saúde">💧</div>
+    <div class="icon" id="icon2" title="Agenda">📦</div>
+  </div>
+  <div class="slot right-slot">
+    <div class="icon" id="bauBtn" title="BAÚ">📦</div>
+    <div class="icon" id="settingsBtn" title="Config">⚙️</div>
+  </div>
+</div>
+
+<!-- DAY MODAL -->
+<div class="modal" id="dayModal" aria-hidden="true">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
+    <div class="head">
+      <div>
+        <h3 id="dayTitle">Dia</h3>
+        <div class="small" id="daySubtitle"></div>
+      </div>
+      <div class="right-actions">
+        <button class="close-x" id="closeDay">Fechar</button>
+      </div>
+    </div>
+
+    <div class="sections">
+      <div class="section">
+        <h4>Trabalho</h4>
+        <div class="small">Horário calculado (saída de casa → chegada)</div>
+        <div style="margin-top:8px" id="workTime" class="small"></div>
+      </div>
+
+      <div class="section">
+        <h4>Alimentação</h4>
+        <div class="small">Sugestões (edite se necessário)</div>
+        <div style="margin-top:8px" id="mealsContainer"></div>
+      </div>
+
+      <div class="section">
+        <h4>Treino</h4>
+        <label class="small">Intensidade</label>
+        <select id="trainIntensity" style="margin-top:6px">
+          <option value="high">Alta</option>
+          <option value="moderate">Moderada</option>
+          <option value="low">Leve</option>
+        </select>
+        <div style="margin-top:8px" class="small">Duração (horas)</div>
+        <input id="trainDuration" type="number" min="0" max="4" step="0.5" value="1.5" style="margin-top:6px" />
+      </div>
+
+      <div class="section">
+        <h4>Gastos & Ganhos</h4>
+        <div class="small">Adicione gastos (negativo) ou ganhos (positivo)</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="txDesc" placeholder="Descrição (ex.: aluguel)" />
+          <input id="txValue" placeholder="Valor R$" type="number" />
+          <button class="btn" id="addTx">Adicionar</button>
+        </div>
+        <div id="txList" style="margin-top:8px"></div>
+      </div>
+
+      <div class="section">
+        <h4>Exercícios (em casa)</h4>
+        <textarea id="exList" placeholder="Ex.: Peito — 3 exercícios x 2 rounds"></textarea>
+      </div>
+
+      <div class="section">
+        <h4>Tarefas de Casa</h4>
+        <div class="small">Rotina de limpeza (editar frequência quando quiser)</div>
+        <textarea id="chores" placeholder="Ex.: Varrer a cada 3 dias, passar pano a cada 6 dias"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" id="deleteDay">Apagar dia</button>
+        <button class="btn primary" id="saveDay">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HEALTH PANEL (simple overlay, opened by icon) -->
+<div class="modal" id="healthModal" aria-hidden="true">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="healthTitle">
+    <div class="head">
+      <div>
+        <h3 id="healthTitle">Painel de Saúde</h3>
+        <div class="small" id="healthSub">Resumo rápido</div>
+      </div>
+      <div class="right-actions">
+        <button class="close-x" id="closeHealth">Fechar</button>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div class="small">Hidratação</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <div style="text-align:center">
+            <div id="hydA" style="font-weight:700;color:var(--gold);font-size:18px">0/4</div>
+            <div class="small">Garrafa A</div>
+          </div>
+          <div style="text-align:center">
+            <div id="hydB" style="font-weight:700;color:var(--gold);font-size:18px">0/4</div>
+            <div class="small">Garrafa B</div>
+          </div>
+          <div style="margin-left:auto">
+            <button class="btn" id="add25">+25 ml</button>
+            <div class="small" style="margin-top:8px">Total: <strong id="waterTotal">0</strong> ml</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="small">Água Meta: <strong id="metaWater">2100</strong> ml</div>
+      </div>
+
+      <div>
+        <div class="small">Kcal (hoje)</div>
+        <div style="margin-top:8px;font-weight:700" id="kcalToday">0 / 2606</div>
+        <div style="margin-top:12px" class="small">Sono</div>
+        <div style="margin-top:6px" id="sleepToday">0 / 8h</div>
+        <div style="margin-top:12px" class="small">Treino</div>
+        <div style="margin-top:6px" id="trainToday">—</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;display:flex;justify-content:flex-end">
+      <button class="btn primary" id="confirmHealth">Salvar Saúde</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* KING v5.7.3 - functional calendar + modals
+   - click day -> day modal (edit sections)
+   - health modal (water/calories)
+   - save/export to JSON
+   - uses localStorage with prefix
+*/
+
+/* STORAGE KEYS */
+const PREFIX = 'KING_v573_';
+const KEY_DAY = PREFIX + 'days';
+const KEY_HYD = PREFIX + 'hydration';
+const KEY_HEALTH = PREFIX + 'health';
+const META = { kcal:2606, agua:2100, sono:8 };
+
+/* folgas (user-provided) */
+const FOLGAS = new Set([4,9,18,23,24]);
+
+/* load/save helpers */
+function load(key, fallback){ try{ const s = localStorage.getItem(key); return s ? JSON.parse(s) : fallback; }catch(e){ return fallback; } }
+function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+/* data */
+let days = load(KEY_DAY, {}); // keyed by YYYY-MM-DD
+let hydration = load(KEY_HYD, {bottles:[0,0], extra:0});
+let health = load(KEY_HEALTH, {});
+
+/* DOM refs */
+const weekHead = document.getElementById('weekHead');
+const calendarGrid = document.getElementById('calendarGrid');
+const monthlyFill = document.getElementById('monthlyFill');
+const saveBtn = document.getElementById('saveBtn');
+const exportBtn = document.getElementById('exportBtn');
+
+const dayModal = document.getElementById('dayModal');
+const dayTitle = document.getElementById('dayTitle');
+const daySubtitle = document.getElementById('daySubtitle');
+const workTimeEl = document.getElementById('workTime');
+const mealsContainer = document.getElementById('mealsContainer');
+const trainIntensity = document.getElementById('trainIntensity');
+const trainDuration = document.getElementById('trainDuration');
+const txDesc = document.getElementById('txDesc');
+const txValue = document.getElementById('txValue');
+const txList = document.getElementById('txList');
+const addTxBtn = document.getElementById('addTx');
+const exList = document.getElementById('exList');
+const chores = document.getElementById('chores');
+const saveDayBtn = document.getElementById('saveDay');
+const deleteDayBtn = document.getElementById('deleteDay');
+const closeDayBtn = document.getElementById('closeDay');
+
+const healthModal = document.getElementById('healthModal');
+const openHealthIcons = document.querySelectorAll('#icon1,#homeBtn,#icon2'); // several icons open health for demo
+const closeHealthBtn = document.getElementById('closeHealth');
+const hydA = document.getElementById('hydA');
+const hydB = document.getElementById('hydB');
+const add25Btn = document.getElementById('add25');
+const waterTotal = document.getElementById('waterTotal');
+const kcalToday = document.getElementById('kcalToday');
+const sleepToday = document.getElementById('sleepToday');
+const trainToday = document.getElementById('trainToday');
+const confirmHealthBtn = document.getElementById('confirmHealth');
+
+/* date helpers */
+function pad(n){ return String(n).padStart(2,'0'); }
+function keyFrom(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
+function todayKey(){ const n=new Date(); return keyFrom(n.getFullYear(), n.getMonth()+1, n.getDate()); }
+function prettyKey(k){ const p=k.split('-'); return new Date(p[0], p[1]-1, p[2]).toLocaleDateString(); }
+
+/* week header */
+const weekdayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function renderWeekHead(){ weekHead.innerHTML=''; weekdayNames.forEach(n=>{ const w=document.createElement('div'); w.className='wday'; w.innerText=n; weekHead.appendChild(w); }); }
+
+/* calendar render (month view starting Sunday) */
+function renderCalendar(){
+  calendarGrid.innerHTML='';
+  const now = new Date();
+  const Y = now.getFullYear(), M = now.getMonth();
+  const firstWeekday = new Date(Y,M,1).getDay();
+  const daysInMonth = new Date(Y,M+1,0).getDate();
+
+  // blank leading cells
+  for(let i=0;i<firstWeekday;i++){ const blank=document.createElement('div'); calendarGrid.appendChild(blank); }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const num = document.createElement('div'); num.className='num'; num.innerText = d;
+    const preview = document.createElement('div'); preview.className='preview';
+    const k = keyFrom(Y,M+1,d);
+    const saved = days[k] || {};
+    if(saved.foodShort) preview.innerText = '🍽 ' + saved.foodShort;
+    else if(saved.plannedShakes) preview.innerText = '🥤 Shake';
+    else preview.innerText = '';
+
+    cell.appendChild(num);
+    cell.appendChild(preview);
+
+    // states
     const today = new Date();
-    const currentDay = today.getDate();
+    if(d < today.getDate() && M === today.getMonth()) cell.classList.add('past');
+    if(d === today.getDate() && M === today.getMonth()) cell.classList.add('today');
+    if(FOLGAS.has(d)) { cell.classList.add('folga'); const t=document.createElement('div'); t.className='tag'; t.innerText='Folga'; cell.appendChild(t); }
 
-    function renderCalendar() {
-      const calendar = document.getElementById("calendar");
-      const now = new Date(today.getFullYear(), today.getMonth(), 1);
-      const month = now.getMonth();
-      const daysInMonth = new Date(today.getFullYear(), month + 1, 0).getDate();
-      const firstDay = now.getDay();
+    // click handler opens day modal
+    cell.onclick = ()=> openDayModal(Y,M,d,k);
 
-      calendar.innerHTML = "";
+    calendarGrid.appendChild(cell);
+  }
 
-      for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement("div");
-        calendar.appendChild(empty);
-      }
+  // update monthly progress
+  updateMonthlyProgress();
+}
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const div = document.createElement("div");
-        div.classList.add("day");
-        div.innerHTML = `<strong>${day}</strong>`;
+/* monthly progress calculation (avg of recorded day "equilibrium") */
+function updateMonthlyProgress(){
+  const now=new Date(); const Y=now.getFullYear(); const M=now.getMonth()+1;
+  const daysInMonth = new Date(Y,M,0).getDate();
+  let sum=0,count=0;
+  for(let d=1; d<=daysInMonth; d++){
+    const k=keyFrom(Y,M,d);
+    if(health[k] && typeof health[k].equilibrium==='number'){ sum += health[k].equilibrium; count++; }
+  }
+  const avg = count ? Math.round(sum/count) : 0;
+  document.getElementById('monthlyFill').style.width = Math.min(100, avg) + '%';
+}
 
-        if (day < currentDay) div.classList.add("past");
-        if (day === currentDay) div.classList.add("today");
-        if (folgas.includes(day)) {
-          div.classList.add("folga");
-          div.innerHTML += `<span class="note">Folga</span>`;
-        }
+/* work time heuristic (from your rules) */
+function getWorkTime(y,m,d){
+  const wd = new Date(y,m,d).getDay();
+  switch(wd){
+    case 0: return '15:00 → 00:20 (Dom)';
+    case 1: return '14:00 → 22:20 (Seg)';
+    case 2: return '14:00 → 22:20 (Ter)';
+    case 3: return '18:00 → 01:20 (Qua)';
+    case 4: return '19:00 → 02:20 (Qui)';
+    case 5: return '19:00 → 02:20 (Sex)';
+    case 6: return '19:00 → 02:20 (Sáb)';
+    default: return '';
+  }
+}
 
-        calendar.appendChild(div);
-      }
-    }
+/* open day modal and populate */
+let currentOpenKey = null;
+function openDayModal(year, monthZeroBased, dayNum, key){
+  currentOpenKey = key;
+  const title = `Dia ${dayNum}`;
+  dayTitle.innerText = title;
+  daySubtitle.innerText = prettyKey(key);
+  workTimeEl.innerText = getWorkTime(year, monthZeroBased, dayNum);
 
-    window.onload = renderCalendar;
-  </script>
-</body>
-</html>
+  // load saved or seed
+  days[key] = days[key] || { meals: null, plannedShakes: [{when:'Pré-trabalho',kcal:711,creatina:true,confirmed:false},{when:'Pós-treino',kcal:711,creatina:false,confirmed:false}], kcal:0, transactions: [], exercises:'', chores:''};
+
+  // meals suggestions (generate based on BAU heuristics simplified)
+  const ms = generateMealsForDay(key);
+  renderMealsContainer(ms);
+
+  // other fields
+  trainIntensity.value = days[key].train ? days[key].train.intensity || 'moderate' : 'moderate';
+  trainDuration.value = days[key].train ? (days[key].train.duration || 1.5) : 1.5;
+
+  renderTransactions(days[key].transactions || []);
+  exList.value = days[key].exercises || '';
+  chores.value = days[key].chores || '';
+
+  // show modal
+  dayModal.style.display = 'flex';
+}
+
+/* generate simple meals based on existence of items (BAU omitted complexity) */
+function generateMealsForDay(key){
+  // simple suggestions — can be refined later with BAU
+  const br = ['2 ovos','1 banana','1 pão francês'];
+  const lunch = ['150g arroz','200g purê','1 porção proteína'];
+  const snack = ['30g granola','1 c. mel'];
+  const dinner = ['150g arroz','2 ovos'];
+  const post = ['75g Anabolic Mass','1 banana','300ml leite','1 c. mel','1 c. açúcar'];
+  // lightweight detection if user already saved 'mealsShort'
+  const existing = days[key].meals || null;
+  return existing ? existing : [
+    {label:'Café', items: br, kcal:480},
+    {label:'Almoço', items: lunch, kcal:700},
+    {label:'Lanche', items: snack, kcal:220},
+    {label:'Jantar', items: dinner, kcal:520},
+    {label:'Pós-treino', items: post, kcal:711}
+  ];
+}
+
+/* render meals container with edit options */
+function renderMealsContainer(meals){
+  mealsContainer.innerHTML = '';
+  meals.forEach((m, idx)=>{
+    const box = document.createElement('div');
+    box.style.marginBottom = '10px';
+    box.innerHTML = `<strong>${m.label}</strong><div class="small" style="margin-top:6px">${m.items.join(', ')}</div><div class="small" style="margin-top:6px">≈ ${m.kcal} kcal</div>`;
+    // add edit button
+    const edit = document.createElement('button'); edit.className='btn'; edit.style.marginTop='6px'; edit.innerText='Editar'; edit.onclick = ()=>{
+      const newTxt = prompt('Editar itens (separe por vírgula)', m.items.join(', '));
+      if(newTxt!==null){ m.items = newTxt.split(',').map(s=>s.trim()); days[currentOpenKey].meals = meals; }
+    };
+    box.appendChild(edit);
+    mealsContainer.appendChild(box);
+  });
+}
+
+/* transactions */
+function renderTransactions(list){
+  txList.innerHTML = '';
+  list.forEach((t, i)=>{
+    const div = document.createElement('div'); d
